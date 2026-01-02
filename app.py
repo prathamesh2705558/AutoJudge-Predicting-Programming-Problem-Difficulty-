@@ -18,6 +18,35 @@ except Exception as e:
     print(f"Error loading models: {e}")
     MODELS_LOADED = False
 
+import requests
+from bs4 import BeautifulSoup
+
+def scrape_codeforces(url):
+    try:
+        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'}
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code != 200:
+            return None, "Failed to fetch URL"
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
+        statement = soup.find('div', class_='problem-statement')
+        if not statement:
+            return None, "Could not find problem statement on page"
+            
+        # Extract clear text
+        text_parts = []
+        # Get header title
+        title = soup.find('div', class_='title')
+        if title: text_parts.append(title.get_text())
+        
+        # Get all paragraphs
+        for p in statement.find_all('p'):
+            text_parts.append(p.get_text())
+            
+        return " ".join(text_parts), None
+    except Exception as e:
+        return None, str(e)
+
 @app.route('/')
 def home():
     return render_template('index.html', models_loaded=MODELS_LOADED)
@@ -28,12 +57,26 @@ def predict():
         return jsonify({'error': 'Models not loaded. Please train the models first.'}), 500
 
     data = request.form
-    description = data.get('description', '')
-    input_desc = data.get('input_description', '')
-    output_desc = data.get('output_description', '')
+    url = data.get('problem_url', '').strip()
     
+    # Logic: If URL provided, scrape it. Else use manual text.
+    if url:
+        if 'codeforces.com' in url:
+            full_text, error = scrape_codeforces(url)
+            if error:
+                return jsonify({'error': error}), 400
+        else:
+             return jsonify({'error': 'Only Codeforces URLs are supported currently.'}), 400
+    else:
+        description = data.get('description', '')
+        input_desc = data.get('input_description', '')
+        output_desc = data.get('output_description', '')
+        full_text = f"{description} {input_desc} {output_desc}"
+
+    if not full_text.strip():
+         return jsonify({'error': 'No content provided.'}), 400
+
     # Combine and preprocess
-    full_text = f"{description} {input_desc} {output_desc}"
     cleaned_text = clean_text(full_text)
     
     # Vectorize
