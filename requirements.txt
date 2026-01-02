@@ -4,3 +4,7 @@ flask
 nltk
 joblib
 numpy
+xgboost
+datasets
+requests
+pyarrow

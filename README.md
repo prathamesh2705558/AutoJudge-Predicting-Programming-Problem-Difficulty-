@@ -1,89 +1,82 @@
-# AutoJudge: Programming Problem Difficulty Predictor
+# AutoJudge: AI-Powered Problem Difficulty Predictor
 
-AutoJudge is an intelligent system designed to automatically predict the difficulty class (Easy, Medium, Hard) and a numerical difficulty score for programming problems based solely on their textual descriptions.
+**AutoJudge** is an intelligent machine learning system that predicts the difficulty rating of competitive programming problems (e.g., Codeforces, LeetCode) based solely on their textual description.
 
-## 🚀 Features
+It uses **XGBoost** (Gradient Boosting) and **NLP N-grams** to analyze problem statements, identifying complexity cues like "shortest path", "10^9 constraints", or "maximize profit".
 
--   **Difficulty Classification**: Predicts if a problem is Easy, Medium, or Hard.
--   **Score Regression**: Estimates a numerical difficulty score (e.g., 800-3500).
--   **Synthetic Data Generation**: Automatically generates a synthetic dataset if no external dataset is provided.
--   **Web Interface**: Simple, user-friendly Flask-based UI for real-time predictions.
--   **Text Analysis**: Uses TF-IDF vectorization and standard NLP preprocessing techniques.
+---
 
-## 🛠️ Installation
+## 🚀 Getting Started (Step-by-Step)
 
-1.  **Clone the repository** (if applicable) or navigate to the project directory.
+Follow these instructions to set up the project on your local machine.
 
-2.  **Set up a virtual environment** (recommended):
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
-
-3.  **Install dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-## 🏃 Usage
-
-### 1. Fetch Real Data
-Since the dataset is not included in the repository (to keep it light), you must run the fetch scripts to download problem data from Hugging Face (Codeforces + LeetCode).
-
+### 1. Clone the Repository
 ```bash
-# Fetch Codeforces data
+git clone https://github.com/prathamesh2705558/AutoJudge-Predicting-Programming-Problem-Difficulty-.git
+cd AutoJudge-Predicting-Programming-Problem-Difficulty-
+```
+
+### 2. Set Up Environment
+It is recommended to use a virtual environment to keep your system clean.
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate it (Mac/Linux)
+source venv/bin/activate
+
+# Activate it (Windows)
+# venv\Scripts\activate
+```
+
+### 3. Install Dependencies
+Install all required libraries (Flask, XGBoost, Scikit-Learn, etc.):
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Fetch the Data (Crucial!)
+To keep the repository light, we do not include the dataset. You must run these scripts to download real problems from Hugging Face (~15,000 problems).
+```bash
+# Download ~15,000 Codeforces problems
 python src/fetch_real_data_stream.py
 
-# Fetch LeetCode data
+# Download ~10,000 LeetCode problems
 python src/fetch_leetcode_hf.py
 ```
-*   This will populate `data/dataset.csv` with over 10,000 real problems.
-*   **Note**: This requires an internet connection.
+*This will create a `data/dataset.csv` file (~15MB).*
 
-### 2. Train the Models
-Once data is fetched, train the **XGBoost** models:
-
+### 5. Train the Model
+Now, teach the AI how to judge difficulty using the downloaded data.
 ```bash
-python src/relabel_data.py # Optional: balances class distribution
+# Optional: Balance data distribution (prevents bias towards "Hard")
+python src/relabel_data.py
+
+# Train the XGBoost Brain
 python src/train.py
 ```
-*   This trains an XGBoost Classifier and Regressor and saves them to `models/`.
+*You will see accuracy metrics in the terminal (Expect ~61%). Models will be saved to the `models/` folder.*
 
-### 2. Run the Web Application
-Start the Flask server:
-
+### 6. Run the App
+Launch the web interface!
 ```bash
 python app.py
 ```
-*   The application will start at `http://127.0.0.1:8001`.
-*   Open this URL in your browser to use the interface.
+*   Go to **[http://127.0.0.1:8001](http://127.0.0.1:8001)** in your browser.
+*   Paste any problem description to see the magic.
+
+---
 
 ## 📂 Project Structure
+*   `app.py`: The web server (Flask).
+*   `src/`:
+    *   `train.py`: The brain builder (XGBoost training).
+    *   `preprocess.py`: The translator (Cleans text, preserves numbers like 10^5).
+    *   `fetch_*.py`: Data downloaders.
+*   `models/`: Where the trained AI lives (`.pkl` files).
+*   `data/`: Where the raw CSV lives (ignored by Git).
 
-```
-autoJudge/
-├── data/
-│   └── dataset.csv       # Training data (synthetic or provided)
-├── models/
-│   ├── classifier.pkl    # Trained Logistic Regression model
-│   ├── regressor.pkl     # Trained Linear Regression model
-│   └── vectorizer.pkl    # TF-IDF Vectorizer
-├── src/
-│   ├── preprocess.py     # Text cleaning and preprocessing logic
-│   └── train.py          # Training pipeline script
-├── templates/
-│   └── index.html        # Frontend HTML template
-├── app.py                # Flask application entry point
-├── requirements.txt      # Project dependencies
-└── README.md             # Project documentation
-```
-
-## 🧠 Model Details
-
--   **Preprocessing**: Text is lowercased, special characters removed, stop words removed, and stemmed using PorterStemmer.
--   **Vectorization**: TF-IDF (Term Frequency-Inverse Document Frequency) with a maximum of 5000 features.
--   **Models**: **XGBoost** (Gradient Boosting) for both Classification and Regression.
--   **Preprocessing**: N-gram NLP (1-3 words), constraint preservation, and unbalanced dataset handling.
-
-## 📝 customizable
-You can replace `data/dataset.csv` with your own dataset containing `description`, `input_description`, `output_description`, `problem_class`, and `problem_score` columns to train on real-world data.
+## 🧠 How it Works
+1.  **Reads Text**: Takes your problem description.
+2.  **Vectorizes**: Converts text into numbers using TF-IDF (tracking 1-word, 2-word, and 3-word phrases).
+3.  **Judges**: The **XGBoost Classifier** decides if it's Easy/Medium/Hard. The **Regressor** predicts the exact rating (e.g., 1450).
