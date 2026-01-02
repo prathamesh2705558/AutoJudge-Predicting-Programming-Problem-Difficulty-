@@ -4,6 +4,11 @@
 
 It uses **XGBoost** (Gradient Boosting) and **NLP N-grams** to analyze problem statements, identifying complexity cues like "shortest path", "10^9 constraints", or "maximize profit".
 
+**Key Features:**
+*   **URL Prediction**: Directly paste a Codeforces URL to judge it.
+*   **Smart UI**: Clean, minimalist interface with input/output separation.
+*   **State-of-the-Art Accuracy**: ~61% accuracy on real Codeforces/LeetCode data.
+
 ---
 
 ## 🚀 Getting Started (Step-by-Step)
@@ -63,7 +68,8 @@ Launch the web interface!
 python app.py
 ```
 *   Go to **[http://127.0.0.1:8001](http://127.0.0.1:8001)** in your browser.
-*   Paste any problem description to see the magic.
+*   **Paste Text**: Copy-paste any problem description directly.
+*   **From URL**: Click the "From URL" tab and paste a Codeforces link (e.g., `https://codeforces.com/problemset/problem/4/A`) to automatically fetch and judge it.
 
 ---
 
