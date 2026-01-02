@@ -27,13 +27,27 @@ AutoJudge is an intelligent system designed to automatically predict the difficu
 
 ## 🏃 Usage
 
-### 1. Train the Models
-Before running the application, you need to train the models. This script will also generate a synthetic dataset (`data/dataset.csv`) if one is not found.
+### 1. Fetch Real Data
+Since the dataset is not included in the repository (to keep it light), you must run the fetch scripts to download problem data from Hugging Face (Codeforces + LeetCode).
 
 ```bash
+# Fetch Codeforces data
+python src/fetch_real_data_stream.py
+
+# Fetch LeetCode data
+python src/fetch_leetcode_hf.py
+```
+*   This will populate `data/dataset.csv` with over 10,000 real problems.
+*   **Note**: This requires an internet connection.
+
+### 2. Train the Models
+Once data is fetched, train the **XGBoost** models:
+
+```bash
+python src/relabel_data.py # Optional: balances class distribution
 python src/train.py
 ```
-*   This creates `classifier.pkl`, `regressor.pkl`, and `vectorizer.pkl` in the `models/` directory.
+*   This trains an XGBoost Classifier and Regressor and saves them to `models/`.
 
 ### 2. Run the Web Application
 Start the Flask server:
@@ -68,8 +82,8 @@ autoJudge/
 
 -   **Preprocessing**: Text is lowercased, special characters removed, stop words removed, and stemmed using PorterStemmer.
 -   **Vectorization**: TF-IDF (Term Frequency-Inverse Document Frequency) with a maximum of 5000 features.
--   **Classification**: Logistic Regression.
--   **Regression**: Linear Regression.
+-   **Models**: **XGBoost** (Gradient Boosting) for both Classification and Regression.
+-   **Preprocessing**: N-gram NLP (1-3 words), constraint preservation, and unbalanced dataset handling.
 
 ## 📝 customizable
 You can replace `data/dataset.csv` with your own dataset containing `description`, `input_description`, `output_description`, `problem_class`, and `problem_score` columns to train on real-world data.
