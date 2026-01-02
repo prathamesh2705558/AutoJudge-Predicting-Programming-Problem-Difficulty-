@@ -1,0 +1,16 @@
+# Python internals
+__pycache__/
+*.pyc
+
+# Virtual Environment (The 10k files!)
+venv/
+env/
+
+# Mac OS
+.DS_Store
+
+# Data (Can be re-fetched)
+data/
+
+# Models (Optional - uncommment to ignore if they get too big)
+# models/
